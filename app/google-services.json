@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "343224677749",
+    "firebase_url": "https://control-fila-conservador-default-rtdb.firebaseio.com",
+    "project_id": "control-fila-conservador",
+    "storage_bucket": "control-fila-conservador.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:343224677749:android:4267fd56b00a1398808f3c",
+        "android_client_info": {
+          "package_name": "cl.gpv.llamado_conservador"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeHosz6s2w4SqI_CwpzNyHBEFhUp8Ik3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:343224677749:android:3cdcd6ed93f939c4808f3c",
+        "android_client_info": {
+          "package_name": "com.example.botoneraconservador"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeHosz6s2w4SqI_CwpzNyHBEFhUp8Ik3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
