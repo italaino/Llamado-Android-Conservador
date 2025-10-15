@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.*
 import java.util.Locale
 import cl.gpv.llamado_conservador.R
+import com.example.conservador.ui.MainScreen
 
 class MainActivity : ComponentActivity() {
 

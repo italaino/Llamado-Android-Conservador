@@ -1,9 +1,7 @@
-package cl.gpv.llamado_conservador.ui
-
+package com.example.conservador.ui
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -23,10 +21,14 @@ import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
 import java.util.*
 import cl.gpv.llamado_conservador.R
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.text.TextStyle
+import cl.gpv.llamado_conservador.ui.MainViewModel
 
 private val SECTION_COLORS = mapOf(
     "Atención Preferencial" to Color(0xFF008080),
-    "Retiro de Documentos"   to Color(0xFF2B8C7F),
+    "Retiro de Documentos"   to Color(0xFFDC143C),
     "Revisión de Libros"     to Color(0xFF003180),
     "Atención General"       to Color(0xFF800064)
 )
@@ -60,7 +62,7 @@ fun MainScreen(
         Box(modifier = Modifier.weight(1f).alpha(alphaAnim.value)) {
             Column(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(0.dp)
             ) {
                 Image(
                     painter = painterResource(R.drawable.logo_conservador),
@@ -69,7 +71,7 @@ fun MainScreen(
                         .fillMaxWidth()
                         .height(120.dp)
                         .padding(horizontal = 10.dp),
-                    contentScale = ContentScale.Fit
+                    contentScale = ContentScale.FillWidth
                 )
 
                 Card(
@@ -91,7 +93,7 @@ fun MainScreen(
                                 Text(
                                     text = ultimo?.ticket ?: "--",
                                     style = MaterialTheme.typography.displayLarge,
-                                    fontSize = 140.sp,
+                                    fontSize = 110.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = Color(0xFF212121),
                                     textAlign = TextAlign.Center
@@ -106,10 +108,10 @@ fun MainScreen(
                                     Box(
                                         modifier = Modifier
                                             .background(Color(0xFF212121), RoundedCornerShape(12.dp))
-                                            .padding(horizontal = 24.dp, vertical = 10.dp)
+                                            .padding(horizontal = 70.dp, vertical = 10.dp)
                                     ) {
                                         Text(
-                                            text = "MÓDULO ${moduloTxt.uppercase()}",
+                                            text = "Módulo ${moduloTxt.uppercase()}",
                                             fontSize = 36.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White
@@ -123,14 +125,13 @@ fun MainScreen(
             }
         }
 
-        // ---------------- DERECHA: Historial (4 tarjetas completas visibles, sin título) ----------------
+        // ---------------- DERECHA: Historial (4 tarjetas con fondo de color) ----------------
         Column(modifier = Modifier.weight(1f)) {
             Card(
                 modifier = Modifier.fillMaxSize(),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                // Sin encabezado para ganar espacio
                 Spacer(Modifier.height(8.dp))
 
                 val items = remember(historial) { historial.take(4) }
@@ -143,22 +144,28 @@ fun MainScreen(
                     verticalArrangement = Arrangement.spacedBy(spacing)
                 ) {
                     items.forEachIndexed { index, item ->
-                        // Cada tarjeta ocupa la misma altura
                         Box(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxWidth()
                         ) {
                             val itemColor = getSectionColor(item.seccion)
+
+                            // Estilo de texto con sombra negra
+                            val textShadowStyle = Shadow(
+                                color = Color.Black.copy(alpha = 0.6f),
+                                offset = Offset(2f, 2f),
+                                blurRadius = 4f
+                            )
+
                             Surface(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .heightIn(min = 96.dp), // mínimo por seguridad
-                                color = Color(0xFFF8F9FA),
+                                    .heightIn(min = 96.dp),
+                                color = itemColor, // Ahora el color de fondo es el de la sección
                                 shape = RoundedCornerShape(12.dp),
-                                shadowElevation = 0.dp,
-                                tonalElevation = 0.dp,
-                                border = BorderStroke(2.dp, itemColor)
+                                shadowElevation = 4.dp,
+                                tonalElevation = 0.dp
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -170,40 +177,46 @@ fun MainScreen(
                                     Column {
                                         Text(
                                             text = item.ticket,
-                                            style = MaterialTheme.typography.headlineSmall,
-                                            fontSize = 36.sp,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            color = Color(0xFF212121)
+                                            style = TextStyle(
+                                                fontSize = 36.sp,
+                                                fontWeight = FontWeight.ExtraBold,
+                                                color = Color.White,
+                                                shadow = textShadowStyle
+                                            )
                                         )
                                         Text(
                                             text = item.seccion,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = Color(0xFF666666)
+                                            style = TextStyle(
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                color = Color.White,
+                                                shadow = textShadowStyle
+                                            )
                                         )
                                         if (item.modulo.isNotBlank()) {
                                             Text(
                                                 text = "Módulo ${item.modulo.removePrefix("Módulo ").removePrefix("MÓDULO ")}",
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                fontSize = 16.sp,
-                                                fontWeight = FontWeight.SemiBold,
-                                                color = Color(0xFF333333)
+                                                style = TextStyle(
+                                                    fontSize = 16.sp,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = Color.White,
+                                                    shadow = textShadowStyle
+                                                )
                                             )
                                         }
                                     }
                                     val time = item.timestamp?.toDate()?.let(timeFormatter::format) ?: "--:--"
                                     Text(
                                         text = time,
-                                        style = MaterialTheme.typography.titleLarge,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = Color(0xFF495057)
+                                        style = TextStyle(
+                                            fontSize = 24.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Color.White,
+                                            shadow = textShadowStyle
+                                        )
                                     )
                                 }
                             }
-                        }
-                        if (index < items.lastIndex) {
-                            // el espacio entre tarjetas ya lo maneja Arrangement.spacedBy(spacing)
                         }
                     }
                 }
