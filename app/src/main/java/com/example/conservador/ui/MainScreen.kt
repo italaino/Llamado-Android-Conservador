@@ -44,12 +44,27 @@ fun MainScreen(
 ) {
     val ultimo by viewModel.ultimo.collectAsState()
     val historial by viewModel.historial.collectAsState()
-    val timeFormatter = remember { SimpleDateFormat("HH:mm", Locale("es", "CL")) }
+    val timeFormatter = remember { SimpleDateFormat("h:mm a", Locale("es", "CL")) }
 
     val alphaAnim = remember { Animatable(1f) }
-    LaunchedEffect(ultimo?.ticket) {
-        alphaAnim.snapTo(0.2f)
-        alphaAnim.animateTo(1f, animationSpec = tween(600, easing = FastOutSlowInEasing))
+    val showHistorial = remember { mutableStateOf(true) }
+
+    // Usar timestamp en lugar de solo ticket para detectar nuevos llamados
+    LaunchedEffect(ultimo?.ticket, ultimo?.timestamp) {
+        if (ultimo?.ticket != null) {
+            // Ocultar historial
+            showHistorial.value = false
+
+            // Primer parpadeo
+            alphaAnim.animateTo(0.1f, animationSpec = tween(500, easing = FastOutSlowInEasing))
+            alphaAnim.animateTo(1f, animationSpec = tween(500, easing = FastOutSlowInEasing))
+            // Segundo parpadeo
+            alphaAnim.animateTo(0.1f, animationSpec = tween(500, easing = FastOutSlowInEasing))
+            alphaAnim.animateTo(1f, animationSpec = tween(500, easing = FastOutSlowInEasing))
+
+            // Mostrar historial nuevamente
+            showHistorial.value = true
+        }
     }
 
     Row(
@@ -60,7 +75,7 @@ fun MainScreen(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // ---------------- IZQUIERDA: Ticket + Módulo (sin sección) ----------------
-        Box(modifier = Modifier.weight(1f).alpha(alphaAnim.value)) {
+        Box(modifier = Modifier.weight(1f)) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -78,7 +93,8 @@ fun MainScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
+                        .weight(1f)
+                        .alpha(alphaAnim.value),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
@@ -112,21 +128,35 @@ fun MainScreen(
 
                                 Spacer(Modifier.height(16.dp))
 
-                                val moduloTxt = (ultimo?.modulo ?: "")
+                                val moduloOriginal = ultimo?.modulo ?: ""
+                                val moduloTxt = moduloOriginal
                                     .removePrefix("Módulo ")
                                     .removePrefix("MÓDULO ")
+
                                 if (moduloTxt.isNotBlank()) {
                                     Box(
                                         modifier = Modifier
                                             .background(Color(0xFF003488), RoundedCornerShape(12.dp))
-                                            .padding(horizontal = 50.dp, vertical = 10.dp)
+                                            .padding(horizontal = 55.dp, vertical = 10.dp)
                                     ) {
-                                        Text(
-                                            text = "Módulo ${moduloTxt.uppercase()}",
-                                            fontSize = 36.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White
-                                        )
+                                        if (moduloTxt.contains("Revisión de Libros", ignoreCase = true)) {
+                                            // Caso especial: Revisión de Libros en dos líneas
+                                            Text(
+                                                text = "Revisión\nde Libros",
+                                                fontSize = 36.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White,
+                                                textAlign = TextAlign.Center
+                                            )
+                                        } else {
+                                            // Caso normal: Módulo + número
+                                            Text(
+                                                text = "Módulo ${moduloTxt.uppercase()}",
+                                                fontSize = 36.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -137,97 +167,125 @@ fun MainScreen(
         }
 
         // ---------------- DERECHA: Historial (4 tarjetas con fondo de color) ----------------
-        Column(modifier = Modifier.weight(1f)) {
+        if (showHistorial.value) {
+            Column(modifier = Modifier.weight(1f)) {
 
                 Spacer(Modifier.height(20.dp))
 
                 val items = remember(historial) { historial.take(4) }
                 val spacing = 10.dp
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 8.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(spacing)
-                ) {
-                    items.forEachIndexed { index, item ->
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                        ) {
-                            val itemColor = getSectionColor(item.seccion)
-
-                            // Estilo de texto con sombra negra
-                            val textShadowStyle = Shadow(
-                                color = Color.Black.copy(alpha = 0.7f),
-                                offset = Offset(6f, 6f),
-                                blurRadius = 2f
-                            )
-
-                            Surface(
+                if (items.isEmpty()) {
+                    // Mostrar mensaje cuando no hay historial
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "No hay llamados previos …",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = Color(0xFF6C757D),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                } else {
+                    // Mostrar historial
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 8.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(spacing)
+                    ) {
+                        items.forEachIndexed { index, item ->
+                            Box(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .heightIn(min = 96.dp),
-                                color = itemColor, // Ahora el color de fondo es el de la sección
-                                shape = RoundedCornerShape(12.dp),
-                                shadowElevation = 2.dp,
-                                tonalElevation = 0.dp
+                                    .fillMaxWidth()
+                                    .height(105.dp)
                             ) {
-                                Row(
+                                val itemColor = getSectionColor(item.seccion)
+
+                                // Estilo de texto con sombra negra
+                                val textShadowStyle = Shadow(
+                                    color = Color.Black.copy(alpha = 0.7f),
+                                    offset = Offset(6f, 6f),
+                                    blurRadius = 2f
+                                )
+
+                                Surface(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .padding(horizontal = 30.dp, vertical = 15.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                        .heightIn(min = 96.dp),
+                                    color = itemColor, // Ahora el color de fondo es el de la sección
+                                    shape = RoundedCornerShape(12.dp),
+                                    shadowElevation = 2.dp,
+                                    tonalElevation = 0.dp
                                 ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 20.dp, vertical = 15.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                    ) {
 
-                                    Column {
-                                        // IZQUIERDA: Ticket
-                                        Text(
-                                            text = item.ticket,
-                                            style = TextStyle(
-                                                fontSize = 35.sp,
-                                                fontWeight = FontWeight.ExtraBold,
-                                                color = Color.White,
-                                                shadow = textShadowStyle
-                                            )
-                                        )
-
-                                        if (item.modulo.isNotBlank()) {
+                                        Column {
+                                            // IZQUIERDA: Ticket
                                             Text(
-                                                text = "Módulo ${item.modulo.removePrefix("Módulo ").removePrefix("MÓDULO ")}",
+                                                text = item.ticket,
                                                 style = TextStyle(
-                                                    fontSize = 27.sp,
+                                                    fontSize = 35.sp,
+                                                    fontWeight = FontWeight.ExtraBold,
+                                                    color = Color.White,
+                                                    shadow = textShadowStyle
+                                                )
+                                            )
+
+                                            if (item.modulo.isNotBlank()) {
+                                                val moduloTexto = item.modulo
+                                                    .removePrefix("Módulo ")
+                                                    .removePrefix("MÓDULO ")
+
+                                                val textoFinal = if (moduloTexto.contains("Revisión de Libros", ignoreCase = true)) {
+                                                    "Revisión Libros"
+                                                } else {
+                                                    "Módulo $moduloTexto"
+                                                }
+
+                                                Text(
+                                                    text = textoFinal,
+                                                    style = TextStyle(
+                                                        fontSize = 27.sp,
+                                                        fontWeight = FontWeight.ExtraBold,
+                                                        color = Color.White,
+                                                        shadow = textShadowStyle,
+                                                    )
+                                                )
+                                            }
+
+                                        }
+
+                                        Column {
+                                            // DERECHA: Hora
+                                            val time = item.timestamp?.toDate()?.let(timeFormatter::format) ?: "--:--"
+
+                                            Text(
+                                                text = time,
+                                                style = TextStyle(
+                                                    fontSize = 30.sp,
                                                     fontWeight = FontWeight.ExtraBold,
                                                     color = Color.White,
                                                     shadow = textShadowStyle,
+                                                    textAlign = TextAlign.End,
                                                 )
                                             )
                                         }
 
                                     }
-
-                                    Column {
-                                        // DERECHA: Hora
-                                        val time = item.timestamp?.toDate()?.let(timeFormatter::format) ?: "--:--"
-
-                                        Text(
-                                            text = time,
-                                            style = TextStyle(
-                                                fontSize = 30.sp,
-                                                fontWeight = FontWeight.ExtraBold,
-                                                color = Color.White,
-                                                shadow = textShadowStyle,
-                                                textAlign = TextAlign.End,
-                                            )
-                                        )
-                                    }
-
                                 }
                             }
                         }
                     }
                 }
+            }
         }
     }
 }
