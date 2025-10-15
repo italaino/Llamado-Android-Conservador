@@ -56,11 +56,11 @@ fun MainScreen(
             showHistorial.value = false
 
             // Primer parpadeo
-            alphaAnim.animateTo(0.1f, animationSpec = tween(500, easing = FastOutSlowInEasing))
-            alphaAnim.animateTo(1f, animationSpec = tween(500, easing = FastOutSlowInEasing))
+            alphaAnim.animateTo(0.1f, animationSpec = tween(400, easing = FastOutSlowInEasing))
+            alphaAnim.animateTo(1f, animationSpec = tween(400, easing = FastOutSlowInEasing))
             // Segundo parpadeo
-            alphaAnim.animateTo(0.1f, animationSpec = tween(500, easing = FastOutSlowInEasing))
-            alphaAnim.animateTo(1f, animationSpec = tween(500, easing = FastOutSlowInEasing))
+            alphaAnim.animateTo(0.1f, animationSpec = tween(400, easing = FastOutSlowInEasing))
+            alphaAnim.animateTo(1f, animationSpec = tween(400, easing = FastOutSlowInEasing))
 
             // Mostrar historial nuevamente
             showHistorial.value = true
@@ -86,7 +86,7 @@ fun MainScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp)
-                        .padding(horizontal = 10.dp),
+                        .padding(horizontal = 7.dp),
                     contentScale = ContentScale.Fit
                 )
 
@@ -96,6 +96,7 @@ fun MainScreen(
                         .weight(1f)
                         .alpha(alphaAnim.value),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(8.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -137,24 +138,38 @@ fun MainScreen(
                                     Box(
                                         modifier = Modifier
                                             .background(Color(0xFF003488), RoundedCornerShape(12.dp))
-                                            .padding(horizontal = 55.dp, vertical = 10.dp)
+                                            .padding(horizontal = 50.dp, vertical = 10.dp)
                                     ) {
                                         if (moduloTxt.contains("Revisión de Libros", ignoreCase = true)) {
                                             // Caso especial: Revisión de Libros en dos líneas
                                             Text(
                                                 text = "Revisión\nde Libros",
-                                                fontSize = 36.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color.White,
-                                                textAlign = TextAlign.Center
+                                                style = TextStyle(
+                                                    fontSize = 36.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White,
+                                                    textAlign = TextAlign.Center,
+                                                    shadow = Shadow(
+                                                        color = Color.Black.copy(alpha = 0.5f),
+                                                        offset = Offset(4f, 4f),
+                                                        blurRadius = 3f
+                                                    )
+                                                )
                                             )
                                         } else {
                                             // Caso normal: Módulo + número
                                             Text(
                                                 text = "Módulo ${moduloTxt.uppercase()}",
-                                                fontSize = 36.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color.White
+                                                style = TextStyle(
+                                                    fontSize = 36.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White,
+                                                    shadow = Shadow(
+                                                        color = Color.Black.copy(alpha = 0.5f),
+                                                        offset = Offset(4f, 4f),
+                                                        blurRadius = 3f
+                                                    )
+                                                )
                                             )
                                         }
                                     }
@@ -182,10 +197,12 @@ fun MainScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "No hay llamados previos …",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = Color(0xFF6C757D),
-                            textAlign = TextAlign.Center
+                            "No hay\nLlamados previos",
+                            style = TextStyle(
+                                fontSize = 27.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                textAlign = TextAlign.Center
+                            )
                         )
                     }
                 } else {
@@ -223,7 +240,7 @@ fun MainScreen(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .padding(horizontal = 20.dp, vertical = 15.dp),
+                                            .padding(horizontal = 30.dp, vertical = 15.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                     ) {
 
@@ -245,7 +262,7 @@ fun MainScreen(
                                                     .removePrefix("MÓDULO ")
 
                                                 val textoFinal = if (moduloTexto.contains("Revisión de Libros", ignoreCase = true)) {
-                                                    "Revisión Libros"
+                                                    "Revisión de Libros"
                                                 } else {
                                                     "Módulo $moduloTexto"
                                                 }
