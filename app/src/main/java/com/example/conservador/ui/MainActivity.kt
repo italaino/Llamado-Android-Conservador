@@ -15,6 +15,7 @@ import java.util.Locale
 import cl.gpv.llamado_conservador.R
 import com.example.conservador.ui.MainScreen
 
+
 class MainActivity : ComponentActivity() {
 
     private lateinit var soundPool: SoundPool
